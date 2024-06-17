@@ -8,13 +8,9 @@ import java.util.List;
 @Service
 public interface DummyService {
 
-    DummyModel getDummy(Long id);
-
     List<DummyModel> getDummyList();
-
-    DummyModel createDummy(DummyModel dummyModel);
-
-    DummyModel updateDummy(DummyModel dummyModel);
-
-    void deleteDummy(DummyModel dummyModel);
+    DummyModel getDummyById(Long id);
+    DummyModel createDummy(DummyModel dummy);
+    DummyModel updateDummy(DummyModel dummy);
+    void deleteDummyById(Long id);
 }

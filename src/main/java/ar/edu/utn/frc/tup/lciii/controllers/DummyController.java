@@ -1,51 +1,58 @@
 package ar.edu.utn.frc.tup.lciii.controllers;
 
-import ar.edu.utn.frc.tup.lciii.dtos.DummyDto;
-import ar.edu.utn.frc.tup.lciii.models.DummyModel;
-import ar.edu.utn.frc.tup.lciii.services.DummyService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import java.util.ArrayList;
 import java.util.List;
 
+import ar.edu.utn.frc.tup.lciii.dtos.ResponseDummyDTO;
+import ar.edu.utn.frc.tup.lciii.dtos.SaveDummyDTO;
+import ar.edu.utn.frc.tup.lciii.models.DummyModel;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.*;
+import ar.edu.utn.frc.tup.lciii.services.DummyService;
+
 @RestController
-@RequestMapping("dummy")
+@RequestMapping("/dummy")
 public class DummyController {
+	@Autowired
+	private DummyService dummyService;
+	@Qualifier("modelMapper")
+	@Autowired
+	private ModelMapper modelMapper;
 
-    @Autowired
-    private DummyService dummyService;
+	@GetMapping
+	public List<ResponseDummyDTO> getDummyList() {
+		List<DummyModel> dummyList = dummyService.getDummyList();
 
-    @GetMapping("")
-    private ResponseEntity<DummyDto> getDummyList() {
-        List<DummyModel> dummyModelList = dummyService.getDummyList();
+		List<ResponseDummyDTO> responseDummyList = new ArrayList<>();
+		for (DummyModel dummy : dummyList) {
+			responseDummyList.add(modelMapper.map(dummy, ResponseDummyDTO.class));
+		}
 
-        return null;
-    }
+		return responseDummyList;
+	}
 
-    @GetMapping("/{id}")
-    private ResponseEntity<DummyDto> getDummyList(@PathVariable Long id) {
-        DummyModel dummyModel = dummyService.getDummy(id);
-        return null;
-    }
+	@GetMapping("/{id}")
+	public ResponseDummyDTO getDummyById(@PathVariable Long id) {
+		return modelMapper.map(dummyService.getDummyById(id), ResponseDummyDTO.class);
+	}
 
-    @PostMapping("")
-    private ResponseEntity<DummyDto> createDummy(DummyDto dummyDto) {
-        DummyModel dummyModel = dummyService.createDummy(null);
-        return null;
-    }
+	@PostMapping
+	public ResponseDummyDTO createDummy(@RequestBody SaveDummyDTO saveDummyDTO) {
+		DummyModel dummy = modelMapper.map(saveDummyDTO, DummyModel.class);
+		return modelMapper.map(dummyService.createDummy(dummy), ResponseDummyDTO.class);
+	}
 
-    @PutMapping("")
-    private ResponseEntity<DummyDto> updateDummy(DummyDto dummyDto) {
-        DummyModel dummyModel = dummyService.updateDummy(null);
-        return null;
-    }
+	@PutMapping("/{id}")
+	public ResponseDummyDTO updateDummy(@PathVariable Long id, @RequestBody SaveDummyDTO saveDummyDTO) {
+		DummyModel dummy = modelMapper.map(saveDummyDTO, DummyModel.class);
+		dummy.setId(id);
+		return modelMapper.map(dummyService.updateDummy(dummy), ResponseDummyDTO.class);
+	}
 
-    @DeleteMapping("")
-    private ResponseEntity<DummyDto> deleteDummy(DummyDto dummyDto) {
-        dummyService.deleteDummy(null);
-        return null;
-    }
-
-
+	@DeleteMapping("/{id}")
+	public void deleteDummyById(@PathVariable Long id) {
+		dummyService.deleteDummyById(id);
+	}
 }
