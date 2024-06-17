@@ -12,12 +12,12 @@ import org.springframework.context.annotation.Configuration;
 public class MaperConfiguration {
 
     @Bean
-    public ModelMapper modelMaper(){
+    public ModelMapper modelMapper(){
         return new ModelMapper();
     }
 
     @Bean("Merge Mapper")
-    public ModelMapper mergeMaper(){
+    public ModelMapper mergeMapper(){
         ModelMapper mapper = new ModelMapper();
 
         mapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
