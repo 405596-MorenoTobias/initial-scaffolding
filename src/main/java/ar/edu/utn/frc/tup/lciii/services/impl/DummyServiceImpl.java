@@ -2,6 +2,7 @@ package ar.edu.utn.frc.tup.lciii.services.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import ar.edu.utn.frc.tup.lciii.models.DummyModel;
 import ar.edu.utn.frc.tup.lciii.repositories.DummyJpaRepository;
@@ -41,24 +42,24 @@ public class DummyServiceImpl implements DummyService {
 
     @Override
     public DummyModel createDummy(DummyModel dummy) {
-        // Optional<DummyEntity> DummyEntityFound = dummyJpaRepository.findBySomething();
+        Optional<DummyEntity> dummyEntityFound = dummyJpaRepository.findByDummy("something");
 
-        // if (DummyEntityFound.isPresent()) {
-        //     return null;
-        // }
+        if (dummyEntityFound.isPresent()) {
+            return null;
+        }
 
         DummyEntity dummyEntity = modelMapper.map(dummy, DummyEntity.class);
-        DummyEntity DummyEntitySaved = dummyJpaRepository.save(dummyEntity);
+        DummyEntity dummyEntitySaved = dummyJpaRepository.save(dummyEntity);
 
-        return modelMapper.map(DummyEntitySaved, DummyModel.class);
+        return modelMapper.map(dummyEntitySaved, DummyModel.class);
     }
 
     @Override
     public DummyModel updateDummy(DummyModel dummy) {
         DummyEntity dummyEntity = modelMapper.map(dummy, DummyEntity.class);
-        DummyEntity DummyEntitySaved = dummyJpaRepository.save(dummyEntity);
+        DummyEntity dummyEntitySaved = dummyJpaRepository.save(dummyEntity);
 
-        return modelMapper.map(DummyEntitySaved, DummyModel.class);
+        return modelMapper.map(dummyEntitySaved, DummyModel.class);
     }
 
     @Override

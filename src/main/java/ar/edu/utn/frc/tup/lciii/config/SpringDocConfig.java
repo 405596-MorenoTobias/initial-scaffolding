@@ -14,40 +14,40 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SpringDocConfig {
 
-    @Value("${app.url}")
-    private String url;
+	@Value("${app.url}")
+	private String url;
 
-    @Value("${app.dev-name}")
-    private String devName;
+	@Value("${app.dev-name}")
+	private String devName;
 
-    @Value("${app.dev-email}")
-    private String devEmail;
+	@Value("${app.dev-email}")
+	private String devEmail;
 
-    @Bean
-    public OpenAPI openApi(
-            @Value("${app.name}") String appName,
-            @Value("${app.desc}") String appDescription,
-            @Value("${app.version}") String appVersion) {
-        Info info = new Info()
-                .title(appName)
-                .version(appVersion)
-                .description(appDescription)
-                .contact(new Contact()
-                        .name(devName)
-                        .email(devEmail));
+	@Bean
+	public OpenAPI openApi(
+			@Value("${app.name}") String appName,
+			@Value("${app.desc}") String appDescription,
+			@Value("${app.version}") String appVersion) {
+		Info info = new Info()
+				.title(appName)
+				.version(appVersion)
+				.description(appDescription)
+				.contact(new Contact()
+						.name(devName)
+						.email(devEmail));
 
-        Server server = new Server()
-                .url(url)
-                .description(appDescription);
+		Server server = new Server()
+				.url(url)
+				.description(appDescription);
 
-        return new OpenAPI()
-                .components(new Components())
-                .info(info)
-                .addServersItem(server);
-    }
+		return new OpenAPI()
+				.components(new Components())
+				.info(info)
+				.addServersItem(server);
+	}
 
-    @Bean
-    public ModelResolver modelResolver(ObjectMapper objectMapper) {
-        return new ModelResolver(objectMapper);
-    }
+	@Bean
+	public ModelResolver modelResolver(ObjectMapper objectMapper) {
+		return new ModelResolver(objectMapper);
+	}
 }
