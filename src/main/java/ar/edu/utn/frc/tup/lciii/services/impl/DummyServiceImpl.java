@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import ar.edu.utn.frc.tup.lciii.models.DummyModel;
+import ar.edu.utn.frc.tup.lciii.dtos.ResponseDummyDTO;
+import ar.edu.utn.frc.tup.lciii.dtos.SaveDummyDTO;
 import ar.edu.utn.frc.tup.lciii.repositories.DummyJpaRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,44 +23,45 @@ public class DummyServiceImpl implements DummyService {
     private ModelMapper modelMapper;
 
     @Override
-    public List<DummyModel> getDummyList() {
+    public List<ResponseDummyDTO> getDummyList() {
         List<DummyEntity> dummyEntities = dummyJpaRepository.findAll();
 
-        List<DummyModel> dummyList = new ArrayList<>();
+        List<ResponseDummyDTO> dummyList = new ArrayList<>();
 
         for (DummyEntity dummyEntity : dummyEntities) {
-            dummyList.add(modelMapper.map(dummyEntity, DummyModel.class));
+            dummyList.add(modelMapper.map(dummyEntity, ResponseDummyDTO.class));
         }
 
         return dummyList;
     }
 
     @Override
-    public DummyModel getDummyById(Long id) {
+    public ResponseDummyDTO getDummyById(Long id) {
         DummyEntity dummyEntity = dummyJpaRepository.getReferenceById(id);
-        return modelMapper.map(dummyEntity, DummyModel.class);
+        return modelMapper.map(dummyEntity, ResponseDummyDTO.class);
     }
 
     @Override
-    public DummyModel createDummy(DummyModel dummy) {
-        Optional<DummyEntity> dummyEntityFound = dummyJpaRepository.findByDummy("something");
+    public ResponseDummyDTO createDummy(SaveDummyDTO dummy) throws IllegalArgumentException {
+        Optional<DummyEntity> dummyEntityFound = dummyJpaRepository.findByDummy(dummy.getDummy());
 
         if (dummyEntityFound.isPresent()) {
-            return null;
+            throw new IllegalArgumentException("Dummy already exists");
         }
 
         DummyEntity dummyEntity = modelMapper.map(dummy, DummyEntity.class);
         DummyEntity dummyEntitySaved = dummyJpaRepository.save(dummyEntity);
 
-        return modelMapper.map(dummyEntitySaved, DummyModel.class);
+        return modelMapper.map(dummyEntitySaved, ResponseDummyDTO.class);
     }
 
     @Override
-    public DummyModel updateDummy(DummyModel dummy) {
+    public ResponseDummyDTO updateDummy(Long id, SaveDummyDTO dummy) {
         DummyEntity dummyEntity = modelMapper.map(dummy, DummyEntity.class);
+        dummyEntity.setId(id);
         DummyEntity dummyEntitySaved = dummyJpaRepository.save(dummyEntity);
 
-        return modelMapper.map(dummyEntitySaved, DummyModel.class);
+        return modelMapper.map(dummyEntitySaved, ResponseDummyDTO.class);
     }
 
     @Override

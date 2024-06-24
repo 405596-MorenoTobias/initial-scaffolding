@@ -1,14 +1,15 @@
 package ar.edu.utn.frc.tup.lciii.controllers;
 
+import ar.edu.utn.frc.tup.lciii.dtos.ResponseDummyDTO;
 import ar.edu.utn.frc.tup.lciii.dtos.SaveDummyDTO;
-import ar.edu.utn.frc.tup.lciii.models.DummyModel;
+import ar.edu.utn.frc.tup.lciii.dtos.dummy.ResponseDummyDTO;
+import ar.edu.utn.frc.tup.lciii.dtos.dummy.SaveDummyDTO;
+import ar.edu.utn.frc.tup.lciii.models.Dummy;
 import ar.edu.utn.frc.tup.lciii.services.DummyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -23,15 +24,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-// @WebMvcTest(DummyController.class)
+@WebMvcTest(DummyController.class)
 class DummyControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
 	@Autowired
-	@Qualifier("objectMapper")
 	private ObjectMapper objectMapper;
 
 	@MockBean
@@ -39,13 +37,13 @@ class DummyControllerTest {
 
 	@Test
 	void getDummyList() throws Exception {
-		DummyModel firstDummy = new DummyModel();
-		DummyModel secondDummy = new DummyModel();
+		ResponseDummyDTO firstDummy = new ResponseDummyDTO();
+		ResponseDummyDTO secondDummy = new ResponseDummyDTO();
 
 		firstDummy.setDummy("firstDummy");
 		secondDummy.setDummy("secondDummy");
 
-		List<DummyModel> dummyList = new ArrayList<>();
+		List<ResponseDummyDTO> dummyList = new ArrayList<>();
 		dummyList.add(firstDummy);
 		dummyList.add(secondDummy);
 
@@ -62,7 +60,7 @@ class DummyControllerTest {
 
 	@Test
 	void getDummyById() throws Exception {
-		DummyModel dummyToReturn = new DummyModel();
+		ResponseDummyDTO dummyToReturn = new ResponseDummyDTO();
 		dummyToReturn.setDummy("something");
 
 		when(dummyService.getDummyById(1L)).thenReturn(dummyToReturn);
@@ -81,7 +79,7 @@ class DummyControllerTest {
 				.andExpect(status().isOk())
 				.andReturn();
 
-		DummyModel dummyResult = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), DummyModel.class);
+		Dummy dummyResult = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Dummy.class);
 
 		assertEquals("something", dummyResult.getDummy());
 		// assertEquals("attribute value", dummyResult.getAnotherAttribute());
@@ -93,10 +91,10 @@ class DummyControllerTest {
 		SaveDummyDTO dummyToCreate = new SaveDummyDTO();
 		dummyToCreate.setDummy("dummyToCreate");
 
-		DummyModel dummyCreated = new DummyModel();
+		ResponseDummyDTO dummyCreated = new ResponseDummyDTO();
 		dummyCreated.setDummy("createdDummy");
 
-		when(dummyService.createDummy(any(DummyModel.class))).thenReturn(dummyCreated);
+		when(dummyService.createDummy(any(SaveDummyDTO.class))).thenReturn(dummyCreated);
 
 		mockMvc.perform(post("/dummy")
 						.contentType("application/json")
@@ -107,14 +105,31 @@ class DummyControllerTest {
 	}
 
 	@Test
+	void createDummyWithWrongDummy() throws Exception {
+		SaveDummyDTO dummyToCreate = new SaveDummyDTO();
+		dummyToCreate.setDummy("dummyToCreate");
+
+		when(dummyService.createDummy(any(SaveDummyDTO.class))).thenThrow(new IllegalArgumentException("Dummy already exists"));
+
+		mockMvc.perform(post("/dummy")
+						.contentType("application/json")
+						.content(objectMapper.writeValueAsString(dummyToCreate)))
+				.andDo(print())
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.error").value("Bad Request"))
+				.andExpect(jsonPath("$.status").value(400))
+				.andExpect(jsonPath("$.message").value("Dummy already exists"));
+	}
+
+	@Test
 	void updateDummy() throws Exception {
 		SaveDummyDTO dummyToUpdate = new SaveDummyDTO();
 		dummyToUpdate.setDummy("dummyToUpdate");
 
-		DummyModel dummyUpdated = new DummyModel();
+		ResponseDummyDTO dummyUpdated = new ResponseDummyDTO();
 		dummyUpdated.setDummy("updatedDummy");
 
-		when(dummyService.updateDummy(any(DummyModel.class))).thenReturn(dummyUpdated);
+		when(dummyService.updateDummy(any(Long.class), any(SaveDummyDTO.class))).thenReturn(dummyUpdated);
 
 		mockMvc.perform(put("/dummy/1")
 						.contentType("application/json")

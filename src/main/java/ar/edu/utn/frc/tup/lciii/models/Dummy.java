@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DummyModel {
+public class Dummy {
 	private Long id;
 	private String dummy;
 }
